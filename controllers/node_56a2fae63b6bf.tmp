@@ -1,0 +1,60 @@
+var express = require('express'); //1
+var router = express.Router();
+var sequelize = require('../db');
+var BookModel = sequelize.import('../models/book');
+
+router.post('/createbook', function (req, res) {
+  var nameofbook  = req.body.books.nameOfBook;
+  var author  = req.body.books.author;
+  var genre  = req.body.books.genre;
+  var pubyear  = req.body.books.pubYear;
+  var rating  = req.body.books.rating;
+
+  BookModel
+    .create({
+      nameOfBook: nameofbook,
+      author: author,
+      genre: genre,
+      pubYear: pubyear,
+      rating: rating
+    })
+    .then(
+      function createSuccess(books) {
+        res.json({
+          books: books
+        });
+
+      },
+      function createError(err) {
+        res.send(500, err.message);
+      }
+    );
+});
+
+router.get('/getbook', (req, res) => {
+  BookModel.findAll({
+    attributes: ['id', 'nameOfBook', 'author', 'genre', 'pubYear', 'rating']
+  }).then(function findSuccess(data) {
+    console.log('book data', data); 
+    res.json(data);
+  },
+  function findAllError(err) {
+    res.send(500, err.message)
+  })
+});
+
+router.delete('/delete:id', (req, res) => {
+  var data = req.params.id;
+  console.log(data)
+
+  BookModel.destroy({
+    where: { id: data}
+  }).then(function deleteSuccess(data) {
+    res.send('deleted successfully');
+  },
+  function deleteError(err) {
+    res.send(500, err.message)
+  })
+});
+
+module.exports = router;
